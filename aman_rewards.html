@@ -1,0 +1,805 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Aman Rewards — Loyalty Points System</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Playfair+Display:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --navy:#06aec7;--navy2:#05a0b8;--navy3:#0497ae;
+  --gold:#C9952A;--gold2:#e0a92e;--gold-lt:#FEF3C7;--gold-pale:#fffbeb;
+  --pr:#EA580C;--pr-lt:#FFF3E8;
+  --bu:#1D4ED8;--bu-lt:#EEF4FF;
+  --gr:#15803D;--gr-lt:#DCFCE7;
+  --am:#B45309;--am-lt:#FEF9C3;
+  --te:#0E7490;--te-lt:#CFFAFE;
+  --bg:#F9F8F5;--surface:#fff;--border:#e8e4dc;--border2:#d4cfc5;
+  --txt:#1a1714;--txt2:#6b6560;--txt3:#9e9893;
+  --radius:12px;--radius-sm:8px;--radius-lg:18px;
+  --shadow:0 1px 3px rgba(0,0,0,.06),0 4px 16px rgba(0,0,0,.06);
+  --shadow-md:0 2px 8px rgba(0,0,0,.08),0 8px 32px rgba(0,0,0,.08);
+}
+html{scroll-behavior:smooth}
+body{font-family:'Poppins',sans-serif;background:var(--bg);color:var(--txt);min-height:100vh;line-height:1.6}
+
+/* PAGE SYSTEM */
+.page{display:none}
+.page.active{display:block}
+
+/* NAV */
+nav{position:sticky;top:0;z-index:100;background:rgba(255,255,255,.96);backdrop-filter:blur(12px);border-bottom:1px solid var(--border);padding:0 2rem}
+.nav-inner{max-width:1200px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;height:60px}
+.logo{display:flex;align-items:center;gap:10px;cursor:pointer}
+.logo-name{font-family:'Poppins',sans-serif;font-size:16px;font-weight:600;color:#06aec7}
+.nav-pts{display:flex;align-items:center;gap:10px}
+.pts-badge{background:var(--navy);color:#fff;font-size:13px;font-weight:500;padding:5px 14px;border-radius:20px;letter-spacing:.01em}
+.pts-badge span{color:var(--gold)}
+.lvl-badge{font-size:12px;font-weight:500;padding:4px 10px;border-radius:10px;background:var(--gold-lt);color:var(--am);border:1px solid rgba(201,149,42,.25)}
+.nav-links{display:flex;gap:2rem}
+.nav-links a{font-size:14px;color:var(--txt2);text-decoration:none;font-weight:400;transition:color .2s;cursor:pointer}
+.nav-links a:hover,.nav-links a.active-link{color:var(--navy)}
+.nav-links a.active-link{font-weight:500;border-bottom:2px solid var(--navy);padding-bottom:2px}
+
+/* HERO */
+.hero{max-width:1200px;margin:0 auto;padding:4rem 2rem 3rem;display:grid;grid-template-columns:1fr 420px;gap:4rem;align-items:center}
+.hero-eyebrow{font-size:12px;font-weight:500;letter-spacing:.1em;text-transform:uppercase;color:var(--gold);margin-bottom:1rem}
+.hero-title{font-family:'Playfair Display',serif;font-size:52px;line-height:1.1;font-weight:700;color:var(--navy);margin-bottom:1.25rem}
+.hero-title em{font-style:normal;color:var(--gold)}
+.hero-sub{font-size:17px;color:var(--txt2);line-height:1.7;max-width:480px;margin-bottom:2rem}
+.hero-stats{display:flex;gap:2rem}
+.stat-item{text-align:center}
+.stat-num{font-family:'Playfair Display',serif;font-size:28px;font-weight:700;color:var(--navy)}
+.stat-lbl{font-size:12px;color:var(--txt3);margin-top:2px}
+
+/* PROGRESS CARD */
+.progress-card{background:var(--surface);border-radius:var(--radius-lg);border:1px solid var(--border);padding:1.75rem;box-shadow:var(--shadow-md)}
+.pc-top{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:1.5rem}
+.pc-pts{font-family:'Playfair Display',serif;font-size:38px;font-weight:700;color:var(--navy)}
+.pc-pts small{font-family:'Poppins',sans-serif;font-size:14px;color:var(--txt3);font-weight:400}
+.pc-lvl-info{text-align:right}
+.pc-lvl-name{font-size:15px;font-weight:600;color:var(--gold)}
+.pc-lvl-sub{font-size:12px;color:var(--txt3);margin-top:2px}
+.pc-bar-wrap{margin-bottom:1.25rem}
+.pc-bar-labels{display:flex;justify-content:space-between;font-size:12px;color:var(--txt3);margin-bottom:6px}
+.pc-bar{height:10px;background:#f0ede6;border-radius:5px;overflow:hidden}
+.pc-fill{height:100%;background:linear-gradient(90deg,var(--gold),var(--gold2));border-radius:5px;transition:width .6s cubic-bezier(.4,0,.2,1)}
+.pc-levels{display:grid;grid-template-columns:repeat(5,1fr);gap:4px;margin-top:1rem}
+.pc-level-dot{text-align:center;padding:6px 4px;border-radius:var(--radius-sm);transition:background .2s}
+.pc-level-dot.done{background:var(--gold-pale)}
+.pc-level-dot .dot{width:8px;height:8px;border-radius:50%;background:#e0ddd6;margin:0 auto 4px;transition:background .2s}
+.pc-level-dot.done .dot{background:var(--gold)}
+.pc-level-dot span{font-size:10px;color:var(--txt3);display:block;font-weight:500}
+.pc-level-dot.done span{color:var(--am)}
+
+/* RANK NOTE */
+.rank-note{background:var(--gr-lt);border:1px solid rgba(21,128,61,.2);border-radius:var(--radius-sm);padding:.55rem 1rem;font-size:12px;color:var(--gr);display:flex;align-items:center;gap:6px;margin-top:.75rem}
+
+/* SECTION */
+.section{max-width:1200px;margin:0 auto;padding:3rem 2rem}
+.section-header{display:flex;align-items:baseline;justify-content:space-between;margin-bottom:1.75rem}
+.section-title{font-family:'Playfair Display',serif;font-size:28px;font-weight:700;color:var(--navy)}
+.section-sub{font-size:14px;color:var(--txt3);margin-top:4px}
+
+/* PRODUCT TABS */
+.prod-tabs{display:flex;gap:8px;margin-bottom:1.5rem;flex-wrap:wrap}
+.prod-tab{display:flex;align-items:center;gap:8px;padding:8px 16px;border-radius:24px;border:1.5px solid var(--border);background:var(--surface);cursor:pointer;font-size:13px;font-weight:500;color:var(--txt2);transition:all .2s;white-space:nowrap}
+.prod-tab:hover{border-color:var(--border2);color:var(--txt)}
+.prod-tab.active{border-color:transparent;color:#fff}
+
+/* ACTIONS */
+.actions-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}
+.action-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:1.25rem;display:flex;align-items:center;justify-content:space-between;gap:1rem;cursor:pointer;transition:all .2s;box-shadow:var(--shadow)}
+.action-card:hover{transform:translateY(-1px);box-shadow:var(--shadow-md);border-color:var(--border2)}
+.ac-left{display:flex;align-items:center;gap:12px;flex:1;min-width:0}
+.ac-icon{width:42px;height:42px;border-radius:var(--radius-sm);display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0}
+.ac-body{min-width:0}
+.ac-title{font-size:14px;font-weight:600;color:var(--txt);margin-bottom:3px}
+.ac-sub{font-size:12px;color:var(--txt3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ac-right{display:flex;flex-direction:column;align-items:flex-end;gap:6px;flex-shrink:0}
+.pts-chip{background:var(--gr-lt);color:var(--gr);font-size:12px;font-weight:600;padding:3px 10px;border-radius:10px;border:1px solid rgba(21,128,61,.2)}
+.cross-chip{background:var(--gold-lt);color:var(--am);font-size:10px;font-weight:500;padding:2px 7px;border-radius:8px}
+.earn-btn{background:var(--navy);color:#fff;border:none;font-size:12px;font-weight:500;padding:6px 14px;border-radius:var(--radius-sm);cursor:pointer;transition:background .2s;white-space:nowrap}
+.earn-btn:hover{background:var(--navy3)}
+
+/* REDEEM */
+.redeem-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
+.redeem-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:1.25rem;box-shadow:var(--shadow);transition:all .2s;position:relative;overflow:hidden}
+.redeem-card:hover{transform:translateY(-2px);box-shadow:var(--shadow-md)}
+.redeem-card.locked{opacity:.55}
+.rc-accent{position:absolute;top:0;left:0;right:0;height:3px}
+.rc-icon{width:44px;height:44px;border-radius:var(--radius-sm);display:flex;align-items:center;justify-content:center;font-size:22px;margin-bottom:.85rem}
+.rc-name{font-size:14px;font-weight:600;color:var(--txt);margin-bottom:4px}
+.rc-sub{font-size:12px;color:var(--txt3);margin-bottom:1rem;line-height:1.5}
+.rc-bottom{display:flex;align-items:center;justify-content:space-between;margin-top:auto}
+.rc-cost{font-size:13px;font-weight:600;color:var(--pr)}
+.rc-cost small{font-size:11px;font-weight:400;color:var(--txt3)}
+.rc-btn{font-size:12px;font-weight:500;padding:5px 12px;border-radius:var(--radius-sm);border:1px solid;cursor:pointer;transition:all .2s}
+.rc-btn.can{background:var(--navy);border-color:var(--navy);color:#fff}
+.rc-btn.can:hover{background:var(--navy3)}
+.rc-btn.cant{background:transparent;border-color:var(--border2);color:var(--txt3);cursor:not-allowed}
+.rc-badge{position:absolute;top:10px;right:10px;background:var(--gr);color:#fff;font-size:10px;font-weight:600;padding:2px 7px;border-radius:8px}
+
+/* HOW IT WORKS */
+.how-section{background:#06aec7;padding:4rem 2rem}
+.how-inner{max-width:1200px;margin:0 auto}
+.how-title{font-family:'Playfair Display',serif;font-size:36px;font-weight:700;color:#fff;text-align:center;margin-bottom:.75rem}
+.how-sub{font-size:15px;color:rgba(255,255,255,.55);text-align:center;margin-bottom:3rem}
+.how-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:1.5rem}
+.how-card{background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);border-radius:var(--radius);padding:1.5rem;text-align:center}
+.how-num{font-family:'Playfair Display',serif;font-size:36px;font-weight:700;color:#fff;margin-bottom:.75rem}
+.how-name{font-size:15px;font-weight:600;color:#fff;margin-bottom:.5rem}
+.how-desc{font-size:13px;color:rgba(255,255,255,.5);line-height:1.7}
+
+/* LEVELS */
+.levels-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:12px}
+.level-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:1.25rem;text-align:center;position:relative;overflow:hidden;box-shadow:var(--shadow)}
+.level-card.current{border-color:var(--gold);border-width:2px}
+.level-card.current::before{content:'Your level';position:absolute;top:0;left:0;right:0;background:var(--gold);color:#fff;font-size:10px;font-weight:600;text-align:center;padding:3px 0;letter-spacing:.05em;text-transform:uppercase}
+.level-card.current .lc-content{margin-top:1.5rem}
+.lc-icon{font-size:28px;margin-bottom:.75rem}
+.lc-name{font-family:'Playfair Display',serif;font-size:18px;font-weight:700;margin-bottom:4px}
+.lc-range{font-size:12px;color:var(--txt3);margin-bottom:.85rem}
+.lc-mult{font-size:22px;font-weight:700;color:var(--gold);margin-bottom:4px}
+.lc-mult-lbl{font-size:11px;color:var(--txt3);text-transform:uppercase;letter-spacing:.06em}
+.lc-perks{margin-top:.85rem;display:flex;flex-direction:column;gap:4px}
+.lc-perk{font-size:11px;color:var(--txt2);padding:3px 8px;background:var(--bg);border-radius:6px}
+
+/* MULTIPLIER BANNER */
+.mult-banner{background:var(--gold-pale);border:1px solid rgba(201,149,42,.3);border-radius:var(--radius-sm);padding:.65rem 1rem;font-size:13px;font-weight:500;color:var(--am);display:flex;align-items:center;gap:8px;margin-bottom:1rem}
+
+/* ── ACTIVITY PAGE ── */
+.activity-page{max-width:900px;margin:0 auto;padding:3rem 2rem 4rem}
+.activity-hero{background:var(--navy);border-radius:var(--radius-lg);padding:2rem 2.5rem;margin-bottom:2rem;display:flex;align-items:center;justify-content:space-between;gap:2rem}
+.activity-hero-left h2{font-family:'Playfair Display',serif;font-size:28px;font-weight:700;color:#fff;margin-bottom:.25rem}
+.activity-hero-left p{font-size:14px;color:rgba(255,255,255,.6)}
+.activity-summary{display:flex;gap:2rem}
+.a-sum-item{text-align:center}
+.a-sum-num{font-family:'Playfair Display',serif;font-size:26px;font-weight:700;color:#fff}
+.a-sum-lbl{font-size:11px;color:rgba(255,255,255,.55);margin-top:2px}
+.activity-filters{display:flex;gap:8px;margin-bottom:1.5rem;flex-wrap:wrap}
+.af-btn{padding:6px 14px;border-radius:20px;border:1.5px solid var(--border);background:var(--surface);font-size:12px;font-weight:500;color:var(--txt2);cursor:pointer;transition:all .2s}
+.af-btn:hover{border-color:var(--border2)}
+.af-btn.active{background:var(--navy);border-color:var(--navy);color:#fff}
+.history-list{display:flex;flex-direction:column;gap:8px}
+.hist-row{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);padding:.85rem 1.1rem;display:flex;align-items:center;justify-content:space-between;animation:fadeSlide .3s ease forwards}
+@keyframes fadeSlide{from{opacity:0;transform:translateY(-6px)}to{opacity:1;transform:translateY(0)}}
+.hr-left{display:flex;align-items:center;gap:12px}
+.hr-icon{width:36px;height:36px;border-radius:var(--radius-sm);display:flex;align-items:center;justify-content:center;font-size:17px;flex-shrink:0}
+.hr-title{font-size:13px;font-weight:500;color:var(--txt)}
+.hr-time{font-size:11px;color:var(--txt3);margin-top:2px}
+.hr-pts.pos{color:var(--gr);font-weight:600;font-size:14px}
+.hr-pts.neg{color:var(--pr);font-weight:600;font-size:14px}
+.empty-hist{text-align:center;padding:3rem;color:var(--txt3);font-size:14px}
+.activity-empty-state{text-align:center;padding:4rem 2rem}
+.activity-empty-state .e-icon{font-size:48px;margin-bottom:1rem}
+.activity-empty-state h3{font-family:'Playfair Display',serif;font-size:22px;color:var(--navy);margin-bottom:.5rem}
+.activity-empty-state p{font-size:14px;color:var(--txt3)}
+.go-earn-btn{display:inline-block;margin-top:1.25rem;background:var(--navy);color:#fff;border:none;font-size:14px;font-weight:500;padding:10px 22px;border-radius:var(--radius-sm);cursor:pointer;transition:background .2s}
+.go-earn-btn:hover{background:var(--navy3)}
+
+/* TOAST */
+.toast-wrap{position:fixed;bottom:2rem;right:2rem;z-index:999;display:flex;flex-direction:column;gap:8px;pointer-events:none}
+.toast{background:var(--navy);color:#fff;padding:.75rem 1.25rem;border-radius:var(--radius);font-size:14px;font-weight:500;box-shadow:var(--shadow-md);display:flex;align-items:center;gap:10px;border-left:3px solid var(--gold);opacity:0;transform:translateX(20px);transition:all .3s ease;pointer-events:none}
+.toast.show{opacity:1;transform:translateX(0)}
+
+/* FOOTER */
+footer{background:#06aec7;padding:2rem;text-align:center}
+footer p{color:rgba(255,255,255,.5);font-size:13px}
+footer span{color:var(--gold)}
+
+@keyframes pop{0%{transform:scale(1)}50%{transform:scale(1.15)}100%{transform:scale(1)}}
+
+@media(max-width:900px){
+  .hero{grid-template-columns:1fr;gap:2rem}
+  .progress-card{max-width:420px}
+  .actions-grid,.redeem-grid,.how-grid,.levels-grid{grid-template-columns:repeat(2,1fr)}
+  .activity-hero{flex-direction:column;align-items:flex-start}
+}
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <div class="nav-inner">
+    <div class="logo" onclick="showPage('home')">
+      <img src="data:image/png;base64,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" alt="Aman" style="height:40px;width:40px;border-radius:8px;object-fit:cover;flex-shrink:0">
+      <div class="logo-name">Rewards</div>
+    </div>
+    <div class="nav-links">
+      <a onclick="showPage('home');scrollToId('earn')" id="nl-earn">Earn</a>
+      <a onclick="showPage('home');scrollToId('redeem')" id="nl-redeem">Redeem</a>
+      <a onclick="showPage('home');scrollToId('levels')" id="nl-levels">Levels</a>
+      <a onclick="showPage('home');scrollToId('how')" id="nl-how">How it works</a>
+      <a onclick="showPage('activity')" id="nl-activity">Recent Activity</a>
+    </div>
+    <div class="nav-pts">
+      <div class="pts-badge">Points: <span id="nav-pts">1,250</span></div>
+      <div class="lvl-badge" id="nav-lvl">Silver</div>
+    </div>
+  </div>
+</nav>
+
+<!-- ══════════════════ HOME PAGE ══════════════════ -->
+<div class="page active" id="page-home">
+
+<!-- HERO -->
+<div class="hero">
+  <div class="hero-content">
+    <h1 class="hero-title">Every action<br>earns you <em>more</em>.</h1>
+    <p class="hero-sub">Use any Aman product — pay bills, shop the marketplace, finance a purchase, save, or grow your business — and earn points that unlock rewards across all five. The more you connect, the more you earn.</p>
+    <div class="hero-stats">
+      <div class="stat-item">
+        <div class="stat-num" id="hero-pts">1,250</div>
+        <div class="stat-lbl">Your points</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-num">4</div>
+        <div class="stat-lbl">Products connected</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-num">8</div>
+        <div class="stat-lbl">Rewards available</div>
+      </div>
+    </div>
+  </div>
+  <div>
+    <div class="progress-card">
+      <div class="pc-top">
+        <div>
+          <div class="pc-pts"><span id="pc-pts-num">1,250</span> <small>pts</small></div>
+        </div>
+        <div class="pc-lvl-info">
+          <div class="pc-lvl-name" id="pc-lvl-name">Silver</div>
+          <div class="pc-lvl-sub" id="pc-lvl-sub">750 pts to Gold</div>
+        </div>
+      </div>
+      <div class="pc-bar-wrap">
+        <div class="pc-bar-labels">
+          <span id="pc-bar-from">Silver — 500</span>
+          <span id="pc-bar-to">Gold — 2,000</span>
+        </div>
+        <div class="pc-bar"><div class="pc-fill" id="pc-fill" style="width:50%"></div></div>
+      </div>
+      <div class="pc-levels">
+        <div class="pc-level-dot done"><div class="dot"></div><span>Bronze</span></div>
+        <div class="pc-level-dot" id="lv-silver"><div class="dot"></div><span>Silver</span></div>
+        <div class="pc-level-dot" id="lv-gold"><div class="dot"></div><span>Gold</span></div>
+        <div class="pc-level-dot" id="lv-black"><div class="dot"></div><span>Black</span></div>
+      </div>
+      <div class="rank-note">
+        🔒 Rank is based on points earned this calendar year — redeeming never lowers it, but resets to Bronze on Jan 1.
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- EARN SECTION -->
+<div class="section" id="earn">
+  <div class="section-header">
+    <div>
+      <div class="section-title">Earn points</div>
+      <div class="section-sub">Select a product to see how you can earn — cross-product actions earn bonus points</div>
+    </div>
+  </div>
+
+  <div class="prod-tabs" id="prod-tabs">
+    <button class="prod-tab active" data-prod="ecom" onclick="selectProd('ecom',this)" style="background:#1D4ED8;border-color:#1D4ED8;color:#fff">
+      <span>🛒</span> E-commerce
+    </button>
+    <button class="prod-tab" data-prod="bnpl" onclick="selectProd('bnpl',this)">
+      <span>💳</span> Consumer Finance
+    </button>
+    <button class="prod-tab" data-prod="bill" onclick="selectProd('bill',this)">
+      <span>🧾</span> Bill Pay
+    </button>
+    <button class="prod-tab" data-prod="save" onclick="selectProd('save',this)">
+      <span>🐷</span> Savings & Invest
+    </button>
+  </div>
+
+  <div id="mult-banner" class="mult-banner" style="display:none">
+    ⭐ Silver member — 1.2× points multiplier active on all actions
+  </div>
+
+  <div class="actions-grid" id="actions-grid"></div>
+</div>
+
+<!-- REDEEM SECTION -->
+<div class="section" id="redeem" style="padding-top:0">
+  <div class="section-header">
+    <div>
+      <div class="section-title">Redeem rewards</div>
+      <div class="section-sub">Every reward is tied to a cross-sell opportunity — spending points pulls you toward the next product</div>
+    </div>
+  </div>
+  <div class="redeem-grid" id="redeem-grid"></div>
+</div>
+
+<!-- HOW IT WORKS -->
+<div class="how-section" id="how">
+  <div class="how-inner">
+    <div class="how-title">How Aman Rewards works</div>
+    <div class="how-sub">One system. Five products. Every interaction compounds.</div>
+    <div class="how-grid">
+      <div class="how-card">
+        <div class="how-num">01</div>
+        <div class="how-name">Use any product</div>
+        <div class="how-desc">Every transaction — bill, purchase, repayment, deposit — earns points automatically. No opt-in needed.</div>
+      </div>
+      <div class="how-card">
+        <div class="how-num">02</div>
+        <div class="how-name">Cross-product bonus</div>
+        <div class="how-desc">Use two or more products together and earn 1.5× bonus points. The more products you connect, the more you earn.</div>
+      </div>
+      <div class="how-card">
+        <div class="how-num">03</div>
+        <div class="how-name">Level up (resets yearly)</div>
+        <div class="how-desc">Bronze → Silver → Gold → Black. Rank is based on points earned this calendar year. Redeeming never drops your rank, but the counter resets on Jan 1 — so keep earning.</div>
+      </div>
+      <div class="how-card">
+        <div class="how-num">04</div>
+        <div class="how-name">Redeem to grow</div>
+        <div class="how-desc">Every reward unlocks something in a product you haven't tried yet — cashback, 0% fees, credit limit increases, early deals.</div>
+      </div>
+    </div>
+  </div>
+  <div id="year-reset-banner" style="margin-top:1.25rem;background:var(--bu-lt);border:1px solid rgba(29,78,216,.2);border-radius:var(--radius-sm);padding:.65rem 1.25rem;font-size:13px;color:var(--bu);display:flex;align-items:center;gap:10px">
+    📅 <span id="year-reset-text">Loading reset countdown…</span>
+  </div>
+</div>
+<div class="section" id="levels">
+  <div class="section-header">
+    <div>
+      <div class="section-title">Membership levels</div>
+      <div class="section-sub">Points multipliers based on what you earn this calendar year — rank resets on Jan 1</div>
+    </div>
+  </div>
+  <div class="levels-grid" style="grid-template-columns:repeat(4,1fr)">
+    <div class="level-card" id="lvl-card-bronze">
+      <div class="lc-icon">🥉</div>
+      <div class="lc-name">Bronze</div>
+      <div class="lc-range">0 – 999 pts earned / year</div>
+      <div class="lc-mult">1×</div>
+      <div class="lc-mult-lbl">Multiplier</div>
+      <div class="lc-perks">
+        <div class="lc-perk">Base points on all products</div>
+        <div class="lc-perk">Access to all 8 rewards</div>
+      </div>
+    </div>
+    <div class="level-card" id="lvl-card-silver">
+      <div class="lc-content">
+        <div class="lc-icon">🥈</div>
+        <div class="lc-name">Silver</div>
+        <div class="lc-range">1,000 – 1,999 pts earned / year</div>
+        <div class="lc-mult">1.2×</div>
+        <div class="lc-mult-lbl">Multiplier</div>
+        <div class="lc-perks">
+          <div class="lc-perk">+20% on every action</div>
+          <div class="lc-perk">Priority customer support</div>
+          <div class="lc-perk">Early flash deal access</div>
+        </div>
+      </div>
+    </div>
+    <div class="level-card" id="lvl-card-gold">
+      <div class="lc-icon">🥇</div>
+      <div class="lc-name">Gold</div>
+      <div class="lc-range">2,000 – 4,999 pts earned / year</div>
+      <div class="lc-mult">1.5×</div>
+      <div class="lc-mult-lbl">Multiplier</div>
+      <div class="lc-perks">
+        <div class="lc-perk">+50% on every action</div>
+        <div class="lc-perk">BNPL rate discount</div>
+        <div class="lc-perk">Marketplace seller boost</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<footer>
+    <p><span>Aman</span> Rewards — Points system connecting E-commerce, Consumer Finance, Bill Pay, and Savings & Invest.</p></footer>
+</div>
+<!-- end page-home -->
+
+
+<!-- ══════════════════ ACTIVITY PAGE ══════════════════ -->
+<div class="page" id="page-activity">
+  <div class="activity-page">
+
+    <div class="activity-hero">
+      <div class="activity-hero-left">
+        <h2>Recent Activity</h2>
+        <p>Your complete points history across all products</p>
+      </div>
+      <div class="activity-summary">
+        <div class="a-sum-item">
+          <div class="a-sum-num" id="act-total-earned">1,250</div>
+          <div class="a-sum-lbl">Total earned</div>
+        </div>
+        <div class="a-sum-item">
+          <div class="a-sum-num" id="act-total-spent">0</div>
+          <div class="a-sum-lbl">Total redeemed</div>
+        </div>
+        <div class="a-sum-item">
+          <div class="a-sum-num" id="act-balance">1,250</div>
+          <div class="a-sum-lbl">Current balance</div>
+        </div>
+        <div class="a-sum-item">
+          <div class="a-sum-num" id="act-tx-count">0</div>
+          <div class="a-sum-lbl">Transactions</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="activity-filters" id="act-filters">
+      <button class="af-btn active" onclick="filterActivity('all',this)">All</button>
+      <button class="af-btn" onclick="filterActivity('earn',this)">Earned 🟢</button>
+      <button class="af-btn" onclick="filterActivity('redeem',this)">Redeemed 🔴</button>
+      <button class="af-btn" onclick="filterActivity('ecom',this)">🛒 E-commerce</button>
+      <button class="af-btn" onclick="filterActivity('bnpl',this)">💳 Finance</button>
+      <button class="af-btn" onclick="filterActivity('bill',this)">🧾 Bill Pay</button>
+      <button class="af-btn" onclick="filterActivity('save',this)">🐷 Savings</button>
+    </div>
+
+    <div class="history-list" id="activity-list">
+      <div class="activity-empty-state">
+        <div class="e-icon">📋</div>
+        <h3>No activity yet</h3>
+        <p>Start earning points by using any Aman product.</p>
+        <button class="go-earn-btn" onclick="showPage('home');scrollToId('earn')">Start earning →</button>
+      </div>
+    </div>
+
+  </div>
+  <footer>
+    <p><span>Aman</span> Rewards — Points system connecting E-commerce, Consumer Finance, Bill Pay, Savings & Invest, and SME Finance.</p>
+  </footer>
+</div>
+<!-- end page-activity -->
+
+<!-- TOAST WRAP -->
+<div class="toast-wrap" id="toast-wrap"></div>
+
+<script>
+let pts = 0;
+let totalEarned = 0;   // all-time earned counter — drives rank
+let totalSpent = 0;
+let history = [];
+let activeProd = 'ecom';
+let activeFilter = 'all';
+let prodCounts = {ecom:0,bnpl:0,bill:0,save:0};
+
+// Year-end reset: track which calendar year the session started in
+const CURRENT_YEAR = new Date().getFullYear();
+let rankYear = CURRENT_YEAR; // the year totalEarned is accumulating toward
+
+// Check if a new year has started since last activity and apply reset
+function checkYearReset(){
+  const now = new Date();
+  const thisYear = now.getFullYear();
+  if(thisYear > rankYear){
+    const prevLevel = getLevel(totalEarned);
+    totalEarned = 0;  // rank counter resets; spendable pts are kept
+    rankYear = thisYear;
+    history.unshift({
+      label:'🔄 Annual rank reset — new year '+thisYear+' started',
+      prod:'ecom', amount:0, pts:'–',
+      type:'reset',
+      time:now.toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'}),
+      icon:'🔄', bg:'#EEF4FF', color:'#1D4ED8'
+    });
+    showToast('🔄 New year! Rank reset to Bronze. Your '+pts.toLocaleString()+' pts balance is kept.','#1D4ED8');
+    updateAllUI();
+  }
+}
+
+const LEVELS = [
+  {name:'Bronze', min:0,    max:999,        mult:1.0, emoji:'🥉'},
+  {name:'Silver', min:1000, max:1999,       mult:1.2, emoji:'🥈'},
+  {name:'Gold',   min:2000, max:4999,       mult:1.5, emoji:'🥇'},
+  {name:'Black',  min:5000, max:Infinity,   mult:2.0, emoji:'⬛'},
+];
+
+const PROD_COLORS = {
+  ecom:{color:'#1D4ED8',bg:'#EEF4FF'},
+  bnpl:{color:'#15803D',bg:'#DCFCE7'},
+  bill:{color:'#0E7490',bg:'#CFFAFE'},
+  save:{color:'#B45309',bg:'#FEF9C3'},
+  sme: {color:'#EA580C',bg:'#FFF3E8'},
+};
+
+const PRODUCTS = {
+  ecom:{label:'E-commerce',icon:'🛒',actions:[
+    {id:'ecom_order',  text:'Complete a marketplace order',    sub:'Any order above EGP 100',              base:50,  crossProd:'bill', bonus:'2× if paid with Bill Pay'},
+    {id:'ecom_bnpl',   text:'Buy now, pay later at checkout',  sub:'BNPL on any order above EGP 300',      base:120, crossProd:'bnpl', bonus:'5× on first BNPL use'},
+    {id:'ecom_review', text:'Leave a verified product review', sub:'After delivery confirmation',           base:30,  crossProd:null,   bonus:null},
+    {id:'ecom_goal',   text:'Set a savings goal for a product',sub:'Link to Savings & Invest goal',        base:40,  crossProd:'save', bonus:'3× if savings linked'},
+  ]},
+  bnpl:{label:'Consumer Finance',icon:'💳',actions:[
+    {id:'bnpl_activate',text:'Activate your pre-approved limit', sub:'Available after 30 days of activity',  base:200,crossProd:null, bonus:'Instant 200 pts on activation'},
+    {id:'bnpl_repay',   text:'On-time installment repayment',    sub:'Each installment paid on or before due',base:80, crossProd:'bill',bonus:'3× if paid via Bill Pay'},
+    {id:'bnpl_split',   text:'Split a bill payment (Pay & Split)',sub:'Any bill above EGP 200',              base:100,crossProd:'bill',bonus:'4× cross-product bonus'},
+    {id:'bnpl_shop',    text:'Shop the marketplace with BNPL',   sub:'Any financed marketplace order',       base:150,crossProd:'ecom',bonus:'5× in first 30 days'},
+  ]},
+  bill:{label:'Bill Pay',icon:'🧾',actions:[
+    {id:'bill_util',  text:'Pay electricity or water bill',    sub:'Any utility payment',                   base:25, crossProd:null,  bonus:'2× if set to recurring'},
+    {id:'bill_mobile',text:'Mobile top-up',                    sub:'Any top-up above EGP 50',               base:20, crossProd:null,  bonus:null},
+    {id:'bill_streak',text:'3-month bill payment streak',      sub:'Pay any bill for 3 consecutive months', base:150,crossProd:null,  bonus:'Streak bonus — 5× pts'},
+    {id:'bill_combo', text:'Pay bill then shop marketplace',   sub:'Both in the same session',              base:80, crossProd:'ecom',bonus:'3× cross-product bonus'},
+  ]},
+  save:{label:'Savings & Invest',icon:'🐷',actions:[
+    {id:'save_deposit',text:'Add to Youm B-Youm savings',      sub:'Any deposit amount',                    base:60, crossProd:null,  bonus:'2× on first deposit'},
+    {id:'save_goal',   text:'Complete a savings goal',          sub:'Reach your named goal target',          base:300,crossProd:null,  bonus:'4× milestone bonus'},
+    {id:'save_secured',text:'Savings-secured BNPL unlock',     sub:'Use savings as BNPL collateral',        base:250,crossProd:'bnpl',bonus:'4× cross-product bonus'},
+    {id:'save_returns',text:'Spend daily returns on shopping', sub:'Use Youm B-Youm returns on marketplace',base:100,crossProd:'ecom',bonus:'3× cross-product bonus'},
+  ]},
+};
+
+const REDEEMS = [
+  {id:'r_cb',    name:'EGP 20 cashback',         sub:'Applied to your next marketplace order',     cost:200, icon:'💸', prod:'ecom'},
+  {id:'r_0fee',  name:'0% BNPL fee',              sub:'Waived on your next installment purchase',   cost:350, icon:'🎯', prod:'bnpl'},
+  {id:'r_bill',  name:'Free bill payment',        sub:'Processing fee waived on next utility bill', cost:150, icon:'⚡', prod:'bill'},
+  {id:'r_boost', name:'2× savings returns',       sub:'Double Youm B-Youm returns for 7 days',      cost:400, icon:'📈', prod:'save'},
+  {id:'r_limit', name:'BNPL limit +EGP 500',      sub:'Permanent credit limit increase',            cost:600, icon:'🚀', prod:'bnpl'},
+  {id:'r_deals', name:'Flash deal early access',  sub:'24h before public on marketplace',           cost:250, icon:'⭐', prod:'ecom'},
+  {id:'r_shield',name:'Streak shield',            sub:'Protect your payment streak for 1 month',   cost:180, icon:'🛡️', prod:'bill'},
+];
+
+// Rank is based on totalEarned, not pts
+function getLevel(earned){ return LEVELS.find(l=>earned>=l.min&&earned<=l.max)||LEVELS[0]; }
+
+function showPage(page){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.getElementById('page-'+page).classList.add('active');
+  document.querySelectorAll('.nav-links a').forEach(a=>a.classList.remove('active-link'));
+  if(page==='activity') document.getElementById('nl-activity').classList.add('active-link');
+  window.scrollTo(0,0);
+  if(page==='activity') renderActivityPage();
+}
+
+function scrollToId(id){
+  setTimeout(()=>{
+    const el=document.getElementById(id);
+    if(el) el.scrollIntoView({behavior:'smooth',block:'start'});
+  },50);
+}
+
+function updateAllUI(){
+  const lvl = getLevel(totalEarned);
+  const lvlIdx = LEVELS.indexOf(lvl);
+  const next = LEVELS[lvlIdx+1];
+  const pct = next ? Math.round(((totalEarned-lvl.min)/(next.min-lvl.min))*100) : 100;
+
+  document.getElementById('nav-pts').textContent = pts.toLocaleString();
+  document.getElementById('nav-lvl').textContent = lvl.name;
+  document.getElementById('hero-pts').textContent = pts.toLocaleString();
+  document.getElementById('pc-pts-num').textContent = pts.toLocaleString();
+  document.getElementById('pc-lvl-name').textContent = lvl.emoji+' '+lvl.name;
+  document.getElementById('pc-lvl-sub').textContent = next ? (next.min-totalEarned).toLocaleString()+' pts earned to '+next.name : '🏆 Max level!';
+  document.getElementById('pc-fill').style.width = pct+'%';
+  document.getElementById('pc-bar-from').textContent = lvl.name+' — '+lvl.min.toLocaleString()+' earned';
+  document.getElementById('pc-bar-to').textContent = next ? next.name+' — '+next.min.toLocaleString() : 'Max';
+
+  ['silver','gold','black'].forEach((n,i)=>{
+    const lv = LEVELS[i+1];
+    document.getElementById('lv-'+n).classList.toggle('done', totalEarned >= lv.min);
+  });
+
+  const lvlNames = ['bronze','silver','gold','black'];
+  lvlNames.forEach((n,i)=>{
+    const card = document.getElementById('lvl-card-'+n);
+    if(!card) return;
+    card.classList.toggle('current', i===lvlIdx);
+    const cc = card.querySelector('.lc-content');
+    if(cc) cc.style.marginTop = i===lvlIdx ? '1.5rem' : '0';
+  });
+
+  // Year reset countdown
+  const now = new Date();
+  const nextJan1 = new Date(now.getFullYear()+1, 0, 1);
+  const msLeft = nextJan1 - now;
+  const daysLeft = Math.ceil(msLeft / (1000*60*60*24));
+  const resetEl = document.getElementById('year-reset-text');
+  if(resetEl){
+    const lvlAtReset = getLevel(0);
+    resetEl.textContent = `Rank resets to Bronze in ${daysLeft} day${daysLeft!==1?'s':''} (Jan 1, ${now.getFullYear()+1}). Your spendable points balance will be kept. Earn ${(LEVELS[1].min - totalEarned) > 0 ? (LEVELS[1].min - totalEarned).toLocaleString()+' more pts this year to reach Silver before reset.' : 'You\'re already past Bronze — keep earning to maintain your rank!'}`;
+  }
+
+  const banner = document.getElementById('mult-banner');
+  if(lvl.mult > 1){
+    banner.style.display = 'flex';
+    banner.textContent = '⭐ '+lvl.name+' member — '+lvl.mult+'× points multiplier active on all actions';
+  } else {
+    banner.style.display = 'none';
+  }
+
+  renderRedeems();
+}
+
+function selectProd(prod, btn){
+  activeProd = prod;
+  document.querySelectorAll('.prod-tab').forEach(t=>{
+    t.classList.remove('active');
+    t.style.background='';t.style.borderColor='';t.style.color='';
+  });
+  const colors = {ecom:'#1D4ED8',bnpl:'#15803D',bill:'#0E7490',save:'#B45309',sme:'#EA580C'};
+  btn.classList.add('active');
+  btn.style.background=colors[prod];
+  btn.style.borderColor=colors[prod];
+  btn.style.color='#fff';
+  renderActions();
+}
+
+function renderActions(){
+  const p = PRODUCTS[activeProd];
+  const pc = PROD_COLORS[activeProd];
+  const lvl = getLevel(totalEarned);
+  const grid = document.getElementById('actions-grid');
+  grid.innerHTML = p.actions.map(a=>{
+    const earned = Math.round(a.base * lvl.mult);
+    const cross = a.crossProd ? `<span class="cross-chip">+${PRODUCTS[a.crossProd].label} bonus</span>` : '';
+    return `<div class="action-card" onclick="earnPts('${a.id}','${activeProd}','${a.text}',${a.base})">
+      <div class="ac-left">
+        <div class="ac-icon" style="background:${pc.bg}">${p.icon}</div>
+        <div class="ac-body">
+          <div class="ac-title">${a.text}</div>
+          <div class="ac-sub">${a.sub}${a.bonus?' · '+a.bonus:''}</div>
+        </div>
+      </div>
+      <div class="ac-right">
+        ${cross}
+        <span class="pts-chip">+${earned.toLocaleString()} pts</span>
+        <button class="earn-btn" onclick="event.stopPropagation();earnPts('${a.id}','${activeProd}','${a.text}',${a.base})">Earn →</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function earnPts(id, prod, label, base){
+  checkYearReset();
+  const lvl = getLevel(totalEarned);
+  const pc = PROD_COLORS[prod];
+  const action = PRODUCTS[prod].actions.find(a=>a.id===id);
+  let earned = Math.round(base * lvl.mult);
+  let msg = '';
+  let prevLvl = getLevel(totalEarned);
+
+  prodCounts[prod] = (prodCounts[prod]||0)+1;
+
+  if(action && action.crossProd && prodCounts[action.crossProd] > 0){
+    earned = Math.round(earned * 1.5);
+    msg = `+${earned.toLocaleString()} pts · Cross-product bonus!`;
+  } else {
+    msg = `+${earned.toLocaleString()} pts from ${PRODUCTS[prod].label}`;
+  }
+
+  pts += earned;
+  totalEarned += earned;
+
+  history.unshift({
+    label, prod,
+    amount: earned,
+    pts:'+'+earned.toLocaleString(),
+    type:'earn',
+    time:new Date().toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'}),
+    icon:PRODUCTS[prod].icon, bg:pc.bg, color:pc.color
+  });
+  if(history.length > 100) history.pop();
+
+  showToast(msg, pc.color);
+
+  const newLvl = getLevel(totalEarned);
+  if(prevLvl.name !== newLvl.name){
+    setTimeout(()=>showToast('🎉 Level up — Welcome to '+newLvl.name+'!', '#C9952A'), 900);
+  }
+
+  updateAllUI();
+  renderActions();
+}
+
+function renderRedeems(){
+  const grid = document.getElementById('redeem-grid');
+  grid.innerHTML = REDEEMS.map(r=>{
+    const canAfford = pts >= r.cost;
+    const pc = PROD_COLORS[r.prod];
+    return `<div class="redeem-card ${canAfford?'':'locked'}">
+      <div class="rc-accent" style="background:${pc.color}"></div>
+      <div class="rc-icon" style="background:${pc.bg}">${r.icon}</div>
+      <div class="rc-name">${r.name}</div>
+      <div class="rc-sub">${r.sub}</div>
+      <div class="rc-bottom">
+        <div class="rc-cost">${r.cost.toLocaleString()} <small>pts</small></div>
+        <button class="rc-btn ${canAfford?'can':'cant'}" ${canAfford?'':'disabled'} onclick="redeemReward('${r.id}','${r.name}',${r.cost},'${r.prod}')">
+          ${canAfford?'Redeem':'Need '+(r.cost-pts).toLocaleString()+' more'}
+        </button>
+      </div>
+      ${canAfford?'<div class="rc-badge">Ready</div>':''}
+    </div>`;
+  }).join('');
+}
+
+function redeemReward(id, name, cost, prod){
+  if(pts < cost) return;
+  pts -= cost;
+  totalSpent += cost;
+  const pc = PROD_COLORS[prod];
+  history.unshift({
+    label:'Redeemed: '+name, prod,
+    amount: cost,
+    pts:'-'+cost.toLocaleString(),
+    type:'redeem',
+    time:new Date().toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'}),
+    icon:'🎁', bg:pc.bg, color:pc.color
+  });
+  showToast('✓ '+name+' unlocked! Your rank is unchanged.', '#15803D');
+  updateAllUI();
+}
+
+function filterActivity(filter, btn){
+  activeFilter = filter;
+  document.querySelectorAll('.af-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  renderActivityPage();
+}
+
+function renderActivityPage(){
+  // Update summary stats
+  document.getElementById('act-total-earned').textContent = totalEarned.toLocaleString();
+  document.getElementById('act-total-spent').textContent = totalSpent.toLocaleString();
+  document.getElementById('act-balance').textContent = pts.toLocaleString();
+  document.getElementById('act-tx-count').textContent = history.length;
+
+  const list = document.getElementById('activity-list');
+
+  let filtered = history;
+  if(activeFilter === 'earn') filtered = history.filter(h=>h.type==='earn');
+  else if(activeFilter === 'redeem') filtered = history.filter(h=>h.type==='redeem');
+  else if(['ecom','bnpl','bill','save'].includes(activeFilter)) filtered = history.filter(h=>h.prod===activeFilter);
+
+  if(!filtered.length){
+    list.innerHTML = `<div class="activity-empty-state">
+      <div class="e-icon">📋</div>
+      <h3>${history.length===0?'No activity yet':'No results'}</h3>
+      <p>${history.length===0?'Start earning points by using any Aman product.':'No transactions match this filter.'}</p>
+      ${history.length===0?`<button class="go-earn-btn" onclick="showPage('home');scrollToId('earn')">Start earning →</button>`:''}
+    </div>`;
+    return;
+  }
+
+  list.innerHTML = filtered.map(h=>{
+    const isPos = h.type==='earn';
+    const isReset = h.type==='reset';
+    const lvlInfo = isPos ? '' : isReset ? '' : `<span style="font-size:10px;background:#DCFCE7;color:#15803D;padding:2px 6px;border-radius:6px;margin-left:6px">Rank unchanged</span>`;
+    return `<div class="hist-row" ${isReset?'style="background:#EEF4FF;border-color:rgba(29,78,216,.2)"':''}>
+      <div class="hr-left">
+        <div class="hr-icon" style="background:${h.bg}">${h.icon}</div>
+        <div>
+          <div class="hr-title">${h.label}${lvlInfo}</div>
+          <div class="hr-time">${h.time} · ${isReset?'System':PRODUCTS[h.prod]?PRODUCTS[h.prod].label:h.prod}</div>
+        </div>
+      </div>
+      <span class="hr-pts" style="color:${isReset?'#1D4ED8':isPos?'var(--gr)':'var(--pr)'}; font-weight:600; font-size:14px">${h.pts} pts</span>
+    </div>`;
+  }).join('');
+}
+
+function showToast(msg, color){
+  const wrap = document.getElementById('toast-wrap');
+  const t = document.createElement('div');
+  t.className='toast';
+  t.style.borderLeftColor = color||'var(--gold)';
+  t.innerHTML = msg;
+  wrap.appendChild(t);
+  requestAnimationFrame(()=>requestAnimationFrame(()=>t.classList.add('show')));
+  setTimeout(()=>{t.classList.remove('show');setTimeout(()=>t.remove(),300)},2800);
+}
+
+updateAllUI();
+renderActions();
+</script>
+</body>
+</html>
